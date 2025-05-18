@@ -1,4 +1,5 @@
 #include <Arduino.h>
+
 #include <Orientation.h>
 #include <PIDControl.h>
 #include <Receiver.h>
@@ -10,7 +11,7 @@
 /* === Timing === */
 const float dt = 0.008;
 
-/* === Orientation === */
+/* === Orientamento === */
 Orientation imu(1000*dt);  // Lettura rapida dei dati IMU
 float pitch, roll;
 
@@ -39,27 +40,31 @@ float yawRateSetpoint = 0.0;
 
 float rollPID, pitchPID, yawPID;
 
-/* === Receiver === */
+/* === Ricevitore === */
 CommandInput in;
 
-/* === Infrared === */
+/* === Infrarossi === */
 Infrared ir(100);  // Lettura lenta dei dati IR
 
 /* === Stato === */
 bool vola = true, lastAtterra, atterra;
 uint16_t distance = 65535;
 
+/* === Prototipi loop principale === */
+void flightControlLoop();
+void groundControlLoop();
+
 void setup() {
   Serial.begin(115200);
 
   initReceiver();         // inizializza ricevitore iBus
-  // initBrushlessPWM();     // inizializza PWM per ESC
+  initBrushlessPWM();     // inizializza PWM per ESC
 
-  ir.begin();             // inizializza Infrared
+  ir.begin();             // inizializza Infrarossi
   imu.begin();
 
   imu.calibrate();
-  // calibrateESCs();
+  // calibra gli ESC
 }
 
 void loop() {
@@ -67,55 +72,63 @@ void loop() {
     distance = ir.readDistance();
   }
   if (imu.isDataReady()) {
-    // Aggiorna orientamento stimato
+    // Aggiorna l'orientamento stimato
     imu.update(pitch, roll);
 
-    // Leggi input da radiocomando
+    // Leggi input dal radiocomando
     readCommands(in);
 
-    // Aggiungi switch per iniziare l'atterraggio
+    // Prepara l'atterraggio solo se è abbastanza vicino al suolo
     atterra = in.atterra && !lastAtterra;
 
-    if (atterra) {  // Estensione gambe fino a contatto switch
+    if (atterra && distance < 200) {  // Estende le gambe fino al contatto con lo switch
       extendUntilContact(vola, atterra);
     } 
     if(vola || atterra){  // Se sta volando o atterrando
-      // Aggiorna i guadagni PID
-      updatePID(in, flightRateRollPID, flightRatePitchPID, lastSwitchState);
-
-      // Aggiorna i setpoint
-      rollSetpoint = in.roll;
-      pitchSetpoint = in.pitch;
-      yawRateSetpoint = in.yaw;
-
-      // Calcola velocità angolari desiderate
-      float desiredRollRate = computePID(flightRollPID, roll, rollSetpoint);
-      float desiredPitchRate = computePID(flightPitchPID, pitch, pitchSetpoint);
-
-      rollPID = computePID(flightRateRollPID, imu.data.rateRoll, desiredRollRate);
-      pitchPID = computePID(flightRatePitchPID, imu.data.ratePitch, desiredPitchRate);
-      yawPID = computePID(flightRateYawPID, imu.data.rateYaw, yawRateSetpoint);
-
-      // Applica PWM ai motori
-      updateMotors(in.throttle, rollPID, pitchPID, yawPID);
+      flightControlLoop();
     }
     else {  // Se è già atterrato
-      // Calcola le azioni PID
-      rollPID = computePID(groundRollPID, roll, 0);
-      pitchPID = computePID(groundPitchPID, pitch, 0);
-
-      // Controlla i motori
-      controlMotors(rollPID, pitchPID); 
-
-      if(groundRollPID.prevError == 0 && groundPitchPID.prevError == 0){
-        vola = true;
-      }     
+      groundControlLoop();
     }
 
     // Debug (seriale)
-    // printReceiverInput(in);
+    printReceiverInput(in);
     printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
 
     lastAtterra = in.atterra;
   }
+}
+
+void flightControlLoop() {
+  // Aggiorna i guadagni PID
+  updatePID(in, flightRateRollPID, flightRatePitchPID, lastSwitchState);
+
+  // Aggiorna i setpoint
+  rollSetpoint = in.roll;
+  pitchSetpoint = in.pitch;
+  yawRateSetpoint = in.yaw;
+
+  // Calcola le velocità angolari desiderate
+  float desiredRollRate = computePID(flightRollPID, roll, rollSetpoint);
+  float desiredPitchRate = computePID(flightPitchPID, pitch, pitchSetpoint);
+
+  rollPID = computePID(flightRateRollPID, imu.data.rateRoll, desiredRollRate);
+  pitchPID = computePID(flightRatePitchPID, imu.data.ratePitch, desiredPitchRate);
+  yawPID = computePID(flightRateYawPID, imu.data.rateYaw, yawRateSetpoint);
+
+  // Applica il PWM ai motori
+  updateMotors(in.throttle, rollPID, pitchPID, yawPID);
+}
+
+void groundControlLoop() {
+  // Calcola le azioni PID
+  rollPID = computePID(groundRollPID, roll, 0);
+  pitchPID = computePID(groundPitchPID, pitch, 0);
+
+  // Controlla i motori
+  controlMotors(rollPID, pitchPID); 
+
+  if(groundRollPID.prevError == 0 && groundPitchPID.prevError == 0){
+    vola = true;
+  }    
 }
