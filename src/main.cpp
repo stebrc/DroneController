@@ -25,9 +25,9 @@ const float Kp1 = 6, Ki1 = 3.5, Kd1 = 0.3;
 PIDController flightRollPID(2, 0, 0, rollThreshold, dt);   // Kp, Ki, Kd, soglia, Ts
 PIDController flightPitchPID(2, 0, 0, pitchThreshold, dt);
 
-PIDController flightRateRollPID(Kp0, Ki0, Kd0, rollThreshold, dt);   // Kp, Ki, Kd, soglia, Ts
+PIDController flightRateRollPID(Kp0, Ki0, Kd0, rollThreshold, dt);
 PIDController flightRatePitchPID(Kp0, Ki0, Kd0, pitchThreshold, dt);
-PIDController flightRateYawPID(2, 12, 0, rollThreshold, dt);   // Kp, Ki, Kd, soglia, Ts
+PIDController flightRateYawPID(2, 12, 0, rollThreshold, dt);
 
 PIDController groundRollPID(1, 0.1, 1, rollThreshold, dt);
 PIDController groundPitchPID(1, 0.1, 1, rollThreshold, dt);
