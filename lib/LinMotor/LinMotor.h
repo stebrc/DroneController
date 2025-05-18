@@ -1,5 +1,5 @@
-#ifndef DCMOTOR_H
-#define DCMOTOR_H
+#ifndef LINMOTOR_H
+#define LINMOTOR_H
 
 #include <Arduino.h>
 
@@ -22,4 +22,4 @@ void controlMotors(float rollPID, float pitchPID);
 
 void extendUntilContact(bool &vola, bool &atterra);
 
-#endif // DCMOTOR_H
+#endif // LINMOTOR_H

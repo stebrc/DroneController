@@ -1,20 +1,18 @@
 #include <Arduino.h>
+#include <Orientation.h>
+#include <PIDControl.h>
 #include <Receiver.h>
 #include <Infrared.h>
-#include <PIDControl.h>
-#include <Orientation.h>
 #include <Brushless.h>
-#include <DCMotor.h>
+#include <LinMotor.h>
 #include <Utils.h>
 
 /* === Timing === */
 const float dt = 0.008;
 
-/* === Receiver === */
-CommandInput in;
-
-/* === Infrared === */
-Infrared ir(100);  // Lettura ogni 100 ms
+/* === Orientation === */
+Orientation imu(1000*dt);  // Lettura e controllo ogni 10 ms
+float pitch, roll;
 
 /* === PID === */
 const float rollThreshold = 0;
@@ -41,9 +39,11 @@ float yawRateSetpoint = 0.0;
 
 float rollPID, pitchPID, yawPID;
 
-/* === Orientation === */
-Orientation imu(1000*dt);  // Lettura e controllo ogni 10 ms
-float pitch, roll;
+/* === Receiver === */
+CommandInput in;
+
+/* === Infrared === */
+Infrared ir(100);  // Lettura ogni 100 ms
 
 /* === Stato === */
 bool vola = true, lastAtterra, atterra;

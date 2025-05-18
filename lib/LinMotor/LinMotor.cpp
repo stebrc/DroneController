@@ -1,4 +1,4 @@
-#include "DCMotor.h"
+#include "LinMotor.h"
 
 void setMotor(int extendPin, int retractPin, int extendState, int retractState) {
   digitalWrite(extendPin, extendState);
