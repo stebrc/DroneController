@@ -11,7 +11,7 @@
 const float dt = 0.008;
 
 /* === Orientation === */
-Orientation imu(1000*dt);  // Lettura e controllo ogni 10 ms
+Orientation imu(1000*dt);  // Lettura rapida dei dati IMU
 float pitch, roll;
 
 /* === PID === */
@@ -43,7 +43,7 @@ float rollPID, pitchPID, yawPID;
 CommandInput in;
 
 /* === Infrared === */
-Infrared ir(100);  // Lettura ogni 100 ms
+Infrared ir(100);  // Lettura lenta dei dati IR
 
 /* === Stato === */
 bool vola = true, lastAtterra, atterra;
