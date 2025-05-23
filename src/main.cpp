@@ -57,14 +57,19 @@ void groundControlLoop();
 void setup() {
   Serial.begin(115200);
 
-  initReceiver();         // inizializza ricevitore iBus
-  initBrushlessPWM();     // inizializza PWM per ESC
+  // iBus
+  initReceiver();
 
-  ir.begin();             // inizializza Infrarossi
-  imu.begin();
-
+  // IR
+  ir.begin();        
+  
+  // IMU
+  imu.begin();            
   imu.calibrate();
-  // calibra gli ESC
+
+  // ESC
+  initBrushlessPWM();
+  // calibrateESCs();
 }
 
 void loop() {
