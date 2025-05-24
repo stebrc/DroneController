@@ -47,7 +47,7 @@ CommandInput in;
 Infrared ir(100);  // Lettura lenta dei dati IR
 
 /* === Stato === */
-bool vola = true, lastAtterra, atterra;
+bool vola = false, lastInAtterra, atterra;
 uint16_t distance = 65535;
 
 /* === Prototipi loop principale === */
@@ -83,24 +83,23 @@ void loop() {
     // Leggi input dal radiocomando
     readCommands(in);
 
-    // Prepara l'atterraggio solo se è abbastanza vicino al suolo
-    atterra = in.atterra && !lastAtterra;
+    // Prepara l'atterraggio quando viene commutato lo switch
+    atterra = in.atterra && !lastInAtterra;
+    lastInAtterra = in.atterra;
 
-    if (atterra && distance < 200) {  // Estende le gambe fino al contatto con lo switch
+    if (atterra && distance < 100) {  // Estende le gambe fino al contatto con lo switch
       extendUntilContact(vola, atterra);
     } 
     if(vola || atterra){  // Se sta volando o atterrando
       flightControlLoop();
     }
-    else {  // Se è già atterrato
+    else {  // Se è a terra
       groundControlLoop();
     }
 
     // Debug (seriale)
     printReceiverInput(in);
     printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
-
-    lastAtterra = in.atterra;
   }
 }
 
