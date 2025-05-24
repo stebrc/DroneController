@@ -10,7 +10,7 @@ public:
     Infrared(uint16_t interval_ms = 100);  // Costruttore con intervallo di lettura
     void begin();                          // Inizializza il sensore
     bool isTimeToRead();                   // Ritorna true se sono passati 100 ms
-    uint16_t readDistance();              // Ritorna la distanza in mm
+    uint16_t readDistance();               // Ritorna la distanza in mm
 
 private:
     VL53L0X sensor;

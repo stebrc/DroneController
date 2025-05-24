@@ -17,7 +17,7 @@ public:
     void begin();
     void calibrate();
     bool isDataReady();
-    void update(float& pitch, float& roll);  // <--- nuova funzione
+    void update(float& pitch, float& roll);
 
     mpuData data;
     
