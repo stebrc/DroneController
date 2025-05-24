@@ -87,7 +87,7 @@ void loop() {
     atterra = in.atterra && !lastInAtterra;
     lastInAtterra = in.atterra;
 
-    if (atterra && distance < 100) {  // Estende le gambe fino al contatto con lo switch
+    if (atterra /*&& distance < 100*/) {  // Estende le gambe fino al contatto con lo switch
       extendUntilContact(vola, atterra);
     } 
     if(vola || atterra){  // Se sta volando o atterrando
