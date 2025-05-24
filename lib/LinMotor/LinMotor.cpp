@@ -30,46 +30,18 @@ void controlMotors(float rollPID, float pitchPID) {
 }
 
 void extendUntilContact(bool &vola, bool &atterra) {
-    bool doneA = false, doneB = false, doneC = false, doneD = false;
+    bool swA = digitalRead(SWITCH_A);
+    bool swB = digitalRead(SWITCH_B);
+    bool swC = digitalRead(SWITCH_C);
+    bool swD = digitalRead(SWITCH_D);
 
-    while (!(doneA && doneB && doneC && doneD)) {
-        if (!doneA) {
-            if (digitalRead(SWITCH_A)) {
-                setMotor(MOTOR_A_EXTEND, MOTOR_A_RETRACT, 0, 0);
-                doneA = true;
-            } else {
-                setMotor(MOTOR_A_EXTEND, MOTOR_A_RETRACT, 1, 0);
-            }
-        }
+    setMotor(MOTOR_A_EXTEND, MOTOR_A_RETRACT, !swA, 0);
+    setMotor(MOTOR_B_EXTEND, MOTOR_B_RETRACT, !swB, 0);
+    setMotor(MOTOR_C_EXTEND, MOTOR_C_RETRACT, !swC, 0);
+    setMotor(MOTOR_D_EXTEND, MOTOR_D_RETRACT, !swD, 0);
 
-        if (!doneB) {
-            if (digitalRead(SWITCH_B)) {
-                setMotor(MOTOR_B_EXTEND, MOTOR_B_RETRACT, 0, 0);
-                doneB = true;
-            } else {
-                setMotor(MOTOR_B_EXTEND, MOTOR_B_RETRACT, 1, 0);
-            }
-        }
-
-        if (!doneC) {
-            if (digitalRead(SWITCH_C)) {
-                setMotor(MOTOR_C_EXTEND, MOTOR_C_RETRACT, 0, 0);
-                doneC = true;
-            } else {
-                setMotor(MOTOR_C_EXTEND, MOTOR_C_RETRACT, 1, 0);
-            }
-        }
-
-        if (!doneD) {
-            if (digitalRead(SWITCH_D)) {
-                setMotor(MOTOR_D_EXTEND, MOTOR_D_RETRACT, 0, 0);
-                doneD = true;
-            } else {
-                setMotor(MOTOR_D_EXTEND, MOTOR_D_RETRACT, 1, 0);
-            }
-        }
+    if (swA && swB && swC && swD) {
+        vola = false;
+        atterra = false;
     }
-
-    vola = false;
-    atterra = false;
 }
