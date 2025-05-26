@@ -48,11 +48,11 @@ void Orientation::calibrate() {
     data.biasPitch /= samples;
     data.biasYaw /= samples;
 
-    Serial.print(data.biasAccX);
-    Serial.print(",");
-    Serial.print(data.biasAccY);
-    Serial.print(",");
-    Serial.println(data.biasAccZ); 
+    // Serial.print(data.biasAccX);
+    // Serial.print(",");
+    // Serial.print(data.biasAccY);
+    // Serial.print(",");
+    // Serial.println(data.biasAccZ); 
 }
 
 bool Orientation::isDataReady() {

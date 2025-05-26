@@ -47,7 +47,7 @@ CommandInput in;
 Infrared ir(100);  // Lettura lenta dei dati IR
 
 /* === Stato === */
-bool vola = false, lastInAtterra, atterra;
+bool vola = true, lastInAtterra, atterra;
 uint16_t distance = 65535;
 
 /* === Prototipi loop principale === */
