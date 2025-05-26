@@ -17,8 +17,6 @@ void Orientation::begin() {
 }
 
 void Orientation::calibrate() {
-    Serial.println("Calibrando...");
-
     const int samples = 2000;
 
     // accelerometro

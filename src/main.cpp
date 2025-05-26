@@ -65,6 +65,7 @@ void setup() {
   
   // IMU
   imu.begin();            
+  Serial.println("Calibrando..."); 
   imu.calibrate();
 
   // ESC
