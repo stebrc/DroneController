@@ -16,10 +16,14 @@
 #define SWITCH_C 64
 #define SWITCH_D 67
 
+void initLinMotor();
+
 void setMotor(int extendPin, int retractPin, int extendState, int retractState);
 
 void controlMotors(float rollPID, float pitchPID);
 
 void extendUntilContact(bool &vola, bool &atterra);
+
+void retractAllMotors();
 
 #endif // LINMOTOR_H

@@ -63,6 +63,9 @@ void setup() {
   // IR
   ir.begin();        
   
+  // LA
+  initLinMotor();
+
   // IMU
   imu.begin();            
   Serial.println("Calibrando..."); 

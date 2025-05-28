@@ -1,5 +1,24 @@
 #include "LinMotor.h"
 
+void initLinMotor(){
+    pinMode(MOTOR_A_EXTEND, OUTPUT);
+    pinMode(MOTOR_A_RETRACT, OUTPUT);
+    pinMode(MOTOR_B_EXTEND, OUTPUT);
+    pinMode(MOTOR_B_RETRACT, OUTPUT);
+    pinMode(MOTOR_C_EXTEND, OUTPUT);
+    pinMode(MOTOR_C_RETRACT, OUTPUT);
+    pinMode(MOTOR_D_EXTEND, OUTPUT);
+    pinMode(MOTOR_D_RETRACT, OUTPUT);
+
+    pinMode(SWITCH_A, INPUT);
+    pinMode(SWITCH_B, INPUT);
+    pinMode(SWITCH_C, INPUT);
+    pinMode(SWITCH_D, INPUT);
+
+    retractAllMotors();
+    delay(1000);
+}
+
 void setMotor(int extendPin, int retractPin, int extendState, int retractState) {
   digitalWrite(extendPin, extendState);
   digitalWrite(retractPin, retractState);
@@ -44,4 +63,11 @@ void extendUntilContact(bool &vola, bool &atterra) {
         vola = false;
         atterra = false;
     }
+}
+
+void retractAllMotors() {
+    setMotor(MOTOR_A_EXTEND, MOTOR_A_RETRACT, 0, 1);
+    setMotor(MOTOR_B_EXTEND, MOTOR_B_RETRACT, 0, 1);
+    setMotor(MOTOR_C_EXTEND, MOTOR_C_RETRACT, 0, 1);
+    setMotor(MOTOR_D_EXTEND, MOTOR_D_RETRACT, 0, 1);
 }
