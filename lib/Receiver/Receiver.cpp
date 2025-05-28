@@ -39,5 +39,6 @@ void printReceiverInput(CommandInput &in) {
   Serial.print(" | inKr: "); Serial.print(in.Kroll);
   Serial.print(" | inKp: "); Serial.print(in.Kpitch);
   Serial.print(" | inKs: "); Serial.print(in.Kselect);
-  Serial.print(" | inKsw: "); Serial.println(in.Kswitch);
+  Serial.print(" | inKsw: "); Serial.print(in.Kswitch);
+  Serial.print(" | inAtterra: "); Serial.println(in.atterra);
 }

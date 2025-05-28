@@ -102,8 +102,8 @@ void loop() {
     }
 
     // Debug (seriale)
-    // printReceiverInput(in);
-    printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
+    printReceiverInput(in);
+    // printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
   }
 }
 
