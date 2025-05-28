@@ -47,7 +47,7 @@ CommandInput in;
 Infrared ir(100);  // Lettura lenta dei dati IR
 
 /* === Stato === */
-bool vola = true, lastInAtterra, atterra;
+bool vola = true, lastInAtterra = false, atterra;
 uint16_t distance = 65535;
 
 /* === Prototipi loop principale === */
@@ -102,7 +102,7 @@ void loop() {
     }
 
     // Debug (seriale)
-    printReceiverInput(in);
+    // printReceiverInput(in);
     // printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
   }
 }

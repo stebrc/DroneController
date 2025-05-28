@@ -10,42 +10,75 @@ void initLinMotor(){
     pinMode(MOTOR_D_EXTEND, OUTPUT);
     pinMode(MOTOR_D_RETRACT, OUTPUT);
 
-    pinMode(SWITCH_A, INPUT);
-    pinMode(SWITCH_B, INPUT);
-    pinMode(SWITCH_C, INPUT);
-    pinMode(SWITCH_D, INPUT);
+    pinMode(SWITCH_A, INPUT_PULLUP);
+    pinMode(SWITCH_B, INPUT_PULLUP);
+    pinMode(SWITCH_C, INPUT_PULLUP);
+    pinMode(SWITCH_D, INPUT_PULLUP);
 
     retractAllMotors();
     delay(1000);
 }
 
-void setMotor(int extendPin, int retractPin, int extendState, int retractState) {
-  digitalWrite(extendPin, extendState);
-  digitalWrite(retractPin, retractState);
+void setMotor(char motor, int command) {
+    int extendPin = -1, retractPin = -1;
+    switch (motor) {
+        case 'A':
+            extendPin = MOTOR_A_EXTEND;
+            retractPin = MOTOR_A_RETRACT;
+            break;
+        case 'B':
+            extendPin = MOTOR_B_EXTEND;
+            retractPin = MOTOR_B_RETRACT;
+            break;
+        case 'C':
+            extendPin = MOTOR_C_EXTEND;
+            retractPin = MOTOR_C_RETRACT;
+            break;
+        case 'D':
+            extendPin = MOTOR_D_EXTEND;
+            retractPin = MOTOR_D_RETRACT;
+            break;
+        default:
+            return; // Motore non valido
+    }
+
+    switch (command) {
+        case -1: // Ritrazione
+            digitalWrite(extendPin, LOW);
+            digitalWrite(retractPin, HIGH);
+            break;
+        case 0: // Stallo
+            digitalWrite(extendPin, LOW);
+            digitalWrite(retractPin, LOW);
+            break;
+        case 1: // Estensione
+            digitalWrite(extendPin, HIGH);
+            digitalWrite(retractPin, LOW);
+            break;
+        default:
+            digitalWrite(extendPin, LOW);
+            digitalWrite(retractPin, LOW);
+            break;
+    }
 }
 
 void controlMotors(float rollPID, float pitchPID) {
-    auto applyControl = [](int sw, float pid, int ext, int ret, bool invert = false) {
-        int extend = 0, retract = 0;
+    auto applyControl = [](char motor, int sw, float pid, bool invert = false) {
+        int command = 0;
         if (!digitalRead(sw)) {
-            extend = 1;
-            retract = 0;
+            command = 1; // Estendi se non premuto
         } else {
-            if (pid > 0) {
-                extend = invert ? 0 : 1;
-                retract = invert ? 1 : 0;
-            } else if (pid < 0) {
-                extend = invert ? 1 : 0;
-                retract = invert ? 0 : 1;
-            }
+            if (pid > 0) command = invert ? -1 : 1;
+            else if (pid < 0) command = invert ? 1 : -1;
+            else command = 0;
         }
-        setMotor(ext, ret, extend, retract);
+        setMotor(motor, command);
     };
 
-    applyControl(SWITCH_A, rollPID, MOTOR_A_EXTEND, MOTOR_A_RETRACT, true);
-    applyControl(SWITCH_B, pitchPID, MOTOR_B_EXTEND, MOTOR_B_RETRACT);
-    applyControl(SWITCH_C, rollPID, MOTOR_C_EXTEND, MOTOR_C_RETRACT);
-    applyControl(SWITCH_D, pitchPID, MOTOR_D_EXTEND, MOTOR_D_RETRACT, true);
+    applyControl('A', SWITCH_A, rollPID, true);
+    applyControl('B', SWITCH_B, pitchPID);
+    applyControl('C', SWITCH_C, rollPID);
+    applyControl('D', SWITCH_D, pitchPID, true);
 }
 
 void extendUntilContact(bool &vola, bool &atterra) {
@@ -54,10 +87,15 @@ void extendUntilContact(bool &vola, bool &atterra) {
     bool swC = digitalRead(SWITCH_C);
     bool swD = digitalRead(SWITCH_D);
 
-    setMotor(MOTOR_A_EXTEND, MOTOR_A_RETRACT, !swA, 0);
-    setMotor(MOTOR_B_EXTEND, MOTOR_B_RETRACT, !swB, 0);
-    setMotor(MOTOR_C_EXTEND, MOTOR_C_RETRACT, !swC, 0);
-    setMotor(MOTOR_D_EXTEND, MOTOR_D_RETRACT, !swD, 0);
+    Serial.print("A:"); Serial.print(swA);
+    Serial.print(" B:"); Serial.print(swB);
+    Serial.print(" C:"); Serial.print(swC);
+    Serial.print(" D:"); Serial.println(swD);
+
+    setMotor('A', swA ? 0 : 1);
+    setMotor('B', swB ? 0 : 1);
+    setMotor('C', swC ? 0 : 1);
+    setMotor('D', swD ? 0 : 1);
 
     if (swA && swB && swC && swD) {
         vola = false;
@@ -66,8 +104,8 @@ void extendUntilContact(bool &vola, bool &atterra) {
 }
 
 void retractAllMotors() {
-    setMotor(MOTOR_A_EXTEND, MOTOR_A_RETRACT, 0, 1);
-    setMotor(MOTOR_B_EXTEND, MOTOR_B_RETRACT, 0, 1);
-    setMotor(MOTOR_C_EXTEND, MOTOR_C_RETRACT, 0, 1);
-    setMotor(MOTOR_D_EXTEND, MOTOR_D_RETRACT, 0, 1);
+    setMotor('A', -1);
+    setMotor('B', -1);
+    setMotor('C', -1);
+    setMotor('D', -1);
 }
