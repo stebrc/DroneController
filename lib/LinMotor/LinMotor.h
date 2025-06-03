@@ -18,7 +18,7 @@
 
 void initLinMotor();
 
-void setMotor(int extendPin, int retractPin, int extendState, int retractState);
+void setMotor(char motor, int command);
 
 void controlMotors(float rollPID, float pitchPID);
 
