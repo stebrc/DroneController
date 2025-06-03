@@ -19,8 +19,8 @@ float pitch, roll;
 const float rollThreshold = 0;
 const float pitchThreshold = 0;
 
-const float Kp0 = 0.6, Ki0 = 0.35, Kd0 = 0.03;
-const float Kp1 = 6, Ki1 = 3.5, Kd1 = 0.3;
+const float Kp0 = 0.6, Ki0 = 0.035, Kd0 = 0.03;
+const float Kp1 = 6, Ki1 = 0.35, Kd1 = 0.3;
 
 PIDController flightRollPID(2, 0, 0, rollThreshold, dt);   // Kp, Ki, Kd, soglia, Ts
 PIDController flightPitchPID(2, 0, 0, pitchThreshold, dt);
@@ -29,8 +29,8 @@ PIDController flightRateRollPID(Kp0, Ki0, Kd0, rollThreshold, dt);
 PIDController flightRatePitchPID(Kp0, Ki0, Kd0, pitchThreshold, dt);
 PIDController flightRateYawPID(2, 12, 0, rollThreshold, dt);
 
-PIDController groundRollPID(1, 0.1, 1, rollThreshold, dt);
-PIDController groundPitchPID(1, 0.1, 1, rollThreshold, dt);
+PIDController groundRollPID(1, 0.1, 1, 1, dt);
+PIDController groundPitchPID(1, 0.1, 1, 1, dt);
 
 bool lastSwitchState = false; // Per modificare i guadagni online
 
@@ -102,8 +102,8 @@ void loop() {
     }
 
     // Debug (seriale)
-    printReceiverInput(in);
-    // printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
+    // printReceiverInput(in);
+    printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
   }
 }
 

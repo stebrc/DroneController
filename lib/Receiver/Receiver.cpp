@@ -21,9 +21,9 @@ bool readSwitch(byte channelInput, bool defaultValue) {
 
 void readCommands(CommandInput &in) {
   in.roll     = readChannel(0, -50, 50, 0);
-  in.pitch    = readChannel(1, -50, 50, 0) - 1;
+  in.pitch    = readChannel(1, -50, 50, 0);
   in.throttle = readChannel(2, 0, 100, 0);
-  in.yaw      = readChannel(3, -50, 50, 0) + 1;
+  in.yaw      = readChannel(3, -50, 50, 0);
   in.Kroll    = readChannel(4, 0, 100, 0);
   in.Kpitch   = readChannel(5, 0, 100, 0);
   in.Kselect  = readChannel(6, 0, 2, 0);

@@ -16,7 +16,7 @@ void initLinMotor(){
     pinMode(SWITCH_D, INPUT);
 
     retractAllMotors();
-    delay(1000);
+    delay(2000);
 }
 
 void setMotor(int extendPin, int retractPin, int extendState, int retractState) {
