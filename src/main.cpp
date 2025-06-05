@@ -26,8 +26,8 @@ const float pitchRateThreshold = 0.5;
 const float yawRateThreshold = 0.5;
 
 // Soglie per il controllo a terra
-const float gRollThreshold = 2.0;
-const float gPitchThreshold = 2.0;
+const float gRollThreshold = 1.5;
+const float gPitchThreshold = 1.5;
 
 const float Kp0 = 0.6, Ki0 = 0.035, Kd0 = 0.03;
 const float Kp1 = 6, Ki1 = 0.35, Kd1 = 0.3;
