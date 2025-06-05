@@ -131,7 +131,7 @@ void setup() {
 
   // Abilita il watchdog timer con un timeout appropriato (es. 250ms)
   // Questo resetterà l'Arduino se il loop principale si blocca per più di 250ms
-  wdt_enable(WDTO_250MS); 
+  wdt_enable(WDTO_30MS); 
   Serial.println("Watchdog Timer abilitato.");
   Serial.println("Setup completato. Avvio loop principale.");
 }
