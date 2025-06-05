@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <EEPROM.h>    // Includi la libreria EEPROM
+#include <avr/wdt.h>   // Includi la libreria per il Watchdog Timer
 
 #include <Orientation.h>
 #include <PIDControl.h>
@@ -54,8 +56,28 @@ uint16_t distance = 65535;
 void flightControlLoop();
 void groundControlLoop();
 
+// --- Struttura per salvare i bias IMU in EEPROM ---
+// Definiamo una struttura per raggruppare tutti i bias
+// Questa struttura deve corrispondere ai bias all'interno di mpuData in Orientation.h
+struct IMUBiasData {
+    float biasRoll;
+    float biasPitch;
+    float biasYaw;
+    float biasAccX;
+    float biasAccY;
+    float biasAccZ;
+    byte calibrationFlag; // Flag per indicare se la calibrazione è stata fatta
+};
+
+const int EEPROM_ADDRESS = 0; // Indirizzo di partenza per salvare i dati IMU nella EEPROM
+const byte CALIBRATION_DONE_FLAG = 0xA5; // Valore "magico" per il flag
+
 void setup() {
   Serial.begin(115200);
+  // Disabilita il watchdog timer temporaneamente per evitare reset durante il setup
+  wdt_disable(); 
+
+  Serial.println("Avvio DroneController...");
 
   // iBus
   initReceiver();
@@ -63,20 +85,62 @@ void setup() {
   // IR
   ir.begin();        
   
-  // LA
+  // LA (Linear Actuators)
   initLinMotor();
 
   // IMU
-  imu.begin();            
-  Serial.println("Calibrando..."); 
-  imu.calibrate();
+  imu.begin();
 
-  // ESC
+  // --- Calibrazione IMU con EEPROM ---
+  IMUBiasData storedBiasData;
+  EEPROM.get(EEPROM_ADDRESS, storedBiasData); // Leggi i dati dalla EEPROM
+
+  if (storedBiasData.calibrationFlag == CALIBRATION_DONE_FLAG) {
+    // Se il flag è presente, carica i bias dalla EEPROM
+    imu.data.biasRoll = storedBiasData.biasRoll;
+    imu.data.biasPitch = storedBiasData.biasPitch;
+    imu.data.biasYaw = storedBiasData.biasYaw;
+    imu.data.biasAccX = storedBiasData.biasAccX;
+    imu.data.biasAccY = storedBiasData.biasAccY;
+    imu.data.biasAccZ = storedBiasData.biasAccZ;
+    Serial.println("IMU bias caricati da EEPROM.");
+  } else {
+    // Se il flag non è presente, esegui la calibrazione e salvala
+    Serial.println("Calibrando IMU (prima volta o dopo reset 'pulito')..."); 
+    imu.calibrate();
+    
+    // Salva i bias calibrati nella struttura
+    storedBiasData.biasRoll = imu.data.biasRoll;
+    storedBiasData.biasPitch = imu.data.biasPitch;
+    storedBiasData.biasYaw = imu.data.biasYaw;
+    storedBiasData.biasAccX = imu.data.biasAccX;
+    storedBiasData.biasAccY = imu.data.biasAccY;
+    storedBiasData.biasAccZ = imu.data.biasAccZ;
+    storedBiasData.calibrationFlag = CALIBRATION_DONE_FLAG; // Imposta il flag di calibrazione
+    
+    // Scrivi la struttura completa nella EEPROM
+    EEPROM.put(EEPROM_ADDRESS, storedBiasData);
+    Serial.println("IMU calibrata e bias salvati in EEPROM.");
+  }
+
+  // ESC (Brushless Motors)
   initBrushlessPWM();
-  // calibrateESCs();
+  // Se la calibrazione degli ESC è necessaria, puoi aggiungere una logica simile qui,
+  // magari con un interruttore fisico o una sequenza di comandi per attivarla.
+  // calibrateESCs(); 
+
+  // Abilita il watchdog timer con un timeout appropriato (es. 250ms)
+  // Questo resetterà l'Arduino se il loop principale si blocca per più di 250ms
+  wdt_enable(WDTO_250MS); 
+  Serial.println("Watchdog Timer abilitato.");
+  Serial.println("Setup completato. Avvio loop principale.");
 }
 
 void loop() {
+  // Reset del watchdog timer in ogni iterazione del loop
+  // Questo impedisce al watchdog di resettare l'Arduino, a meno che il codice non si blocchi
+  wdt_reset(); 
+
   if (ir.isTimeToRead()) {
     distance = ir.readDistance();
   }
@@ -85,11 +149,13 @@ void loop() {
     imu.update(pitch, roll);
 
     // Leggi input dal radiocomando
-    // readCommands(in);
+    // Queste righe erano commentate, le lascio così ma ricordati di attivarle
+    // se vuoi che il drone risponda ai comandi!
+    readCommands(in); 
 
     // Prepara l'atterraggio quando viene commutato lo switch
-    // atterra = in.atterra && !lastInAtterra;
-    // lastInAtterra = in.atterra;
+    atterra = in.atterra && !lastInAtterra;
+    lastInAtterra = in.atterra;
 
     if (distance < 160) {  // Estende le gambe fino al contatto con lo switch
       extendUntilContact(vola, atterra);
@@ -106,8 +172,10 @@ void loop() {
     }
 
     // Debug (seriale)
-    // printReceiverInput(in);
-    // printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
+    // Queste righe erano commentate, le lascio così ma ricordati di attivarle
+    // se vuoi vedere l'output di debug!
+    printReceiverInput(in);
+    printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
   }
 }
 
