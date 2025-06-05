@@ -18,8 +18,16 @@ Orientation imu(1000*dt);  // Lettura rapida dei dati IMU
 float pitch, roll;
 
 /* === PID === */
+// Soglie per il controllo in volo
 const float rollThreshold = 0;
 const float pitchThreshold = 0;
+const float rollRateThreshold = 0.5;
+const float pitchRateThreshold = 0.5;
+const float yawRateThreshold = 0.5;
+
+// Soglie per il controllo a terra
+const float gRollThreshold = 2.0;
+const float gPitchThreshold = 2.0;
 
 const float Kp0 = 0.6, Ki0 = 0.035, Kd0 = 0.03;
 const float Kp1 = 6, Ki1 = 0.35, Kd1 = 0.3;
@@ -27,12 +35,12 @@ const float Kp1 = 6, Ki1 = 0.35, Kd1 = 0.3;
 PIDController flightRollPID(2, 0, 0, rollThreshold, dt);   // Kp, Ki, Kd, soglia, Ts
 PIDController flightPitchPID(2, 0, 0, pitchThreshold, dt);
 
-PIDController flightRateRollPID(Kp0, Ki0, Kd0, rollThreshold, dt);
-PIDController flightRatePitchPID(Kp0, Ki0, Kd0, pitchThreshold, dt);
-PIDController flightRateYawPID(2, 12, 0, rollThreshold, dt);
+PIDController flightRateRollPID(Kp0, Ki0, Kd0, rollRateThreshold, dt);
+PIDController flightRatePitchPID(Kp0, Ki0, Kd0, pitchRateThreshold, dt);
+PIDController flightRateYawPID(2, 12, 0, yawRateThreshold, dt);
 
-PIDController groundRollPID(0.1, 0.0, 0, 2, dt);
-PIDController groundPitchPID(0.1, 0.0, 0, 2, dt);
+PIDController groundRollPID(0.1, 0.0, 0, gRollThreshold, dt);
+PIDController groundPitchPID(0.1, 0.0, 0, gPitchThreshold, dt);
 
 bool lastSwitchState = false; // Per modificare i guadagni online
 
@@ -57,8 +65,6 @@ void flightControlLoop();
 void groundControlLoop();
 
 // --- Struttura per salvare i bias IMU in EEPROM ---
-// Definiamo una struttura per raggruppare tutti i bias
-// Questa struttura deve corrispondere ai bias all'interno di mpuData in Orientation.h
 struct IMUBiasData {
     float biasRoll;
     float biasPitch;
@@ -125,12 +131,9 @@ void setup() {
 
   // ESC (Brushless Motors)
   initBrushlessPWM();
-  // Se la calibrazione degli ESC è necessaria, puoi aggiungere una logica simile qui,
-  // magari con un interruttore fisico o una sequenza di comandi per attivarla.
   // calibrateESCs(); 
 
-  // Abilita il watchdog timer con un timeout appropriato (es. 250ms)
-  // Questo resetterà l'Arduino se il loop principale si blocca per più di 250ms
+  // Abilita il watchdog timer
   wdt_enable(WDTO_30MS); 
   Serial.println("Watchdog Timer abilitato.");
   Serial.println("Setup completato. Avvio loop principale.");
@@ -138,7 +141,6 @@ void setup() {
 
 void loop() {
   // Reset del watchdog timer in ogni iterazione del loop
-  // Questo impedisce al watchdog di resettare l'Arduino, a meno che il codice non si blocchi
   wdt_reset(); 
 
   if (ir.isTimeToRead()) {
@@ -149,18 +151,21 @@ void loop() {
     imu.update(pitch, roll);
 
     // Leggi input dal radiocomando
-    // Queste righe erano commentate, le lascio così ma ricordati di attivarle
-    // se vuoi che il drone risponda ai comandi!
     readCommands(in); 
 
+    // Aggiorna i setpoint
+    rollSetpoint = in.roll;
+    pitchSetpoint = in.pitch;
+    yawRateSetpoint = in.yaw;
+
     // Prepara l'atterraggio quando viene commutato lo switch
-    atterra = in.atterra && !lastInAtterra;
-    lastInAtterra = in.atterra;
+    // atterra = in.atterra && !lastInAtterra;
+    // lastInAtterra = in.atterra;
 
     if (distance < 160) {  // Estende le gambe fino al contatto con lo switch
       extendUntilContact(vola, atterra);
     } 
-    else{
+    else {  // Ritira le gambe quando non c'è contatto
       retractAllMotors();
     }
 
@@ -172,8 +177,6 @@ void loop() {
     }
 
     // Debug (seriale)
-    // Queste righe erano commentate, le lascio così ma ricordati di attivarle
-    // se vuoi vedere l'output di debug!
     printReceiverInput(in);
     printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
   }
@@ -182,11 +185,6 @@ void loop() {
 void flightControlLoop() {
   // Aggiorna i guadagni PID
   updatePID(in, flightRateRollPID, flightRatePitchPID, lastSwitchState);
-
-  // Aggiorna i setpoint
-  rollSetpoint = in.roll;
-  pitchSetpoint = in.pitch;
-  yawRateSetpoint = in.yaw;
 
   // Calcola le velocità angolari desiderate
   float desiredRollRate = computePID(flightRollPID, roll, rollSetpoint);
@@ -202,8 +200,8 @@ void flightControlLoop() {
 
 void groundControlLoop() {
   // Calcola le azioni PID
-  rollPID = computePID(groundRollPID, roll, 0);
-  pitchPID = computePID(groundPitchPID, pitch, 0);
+  rollPID = computePID(groundRollPID, roll, rollSetpoint);
+  pitchPID = computePID(groundPitchPID, pitch, pitchSetpoint);
 
   // Controlla i motori
   controlMotors(rollPID, pitchPID); 
