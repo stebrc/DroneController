@@ -9,7 +9,7 @@
 #include <Utils.h>
 
 /* === Timing === */
-const float dt = 0.008;
+const float dt = 0.02;
 
 /* === Orientamento === */
 Orientation imu(1000*dt);  // Lettura rapida dei dati IMU
@@ -29,8 +29,8 @@ PIDController flightRateRollPID(Kp0, Ki0, Kd0, rollThreshold, dt);
 PIDController flightRatePitchPID(Kp0, Ki0, Kd0, pitchThreshold, dt);
 PIDController flightRateYawPID(2, 12, 0, rollThreshold, dt);
 
-PIDController groundRollPID(1, 0.1, 1, 1, dt);
-PIDController groundPitchPID(1, 0.1, 1, 1, dt);
+PIDController groundRollPID(0.1, 0.0, 0, 2, dt);
+PIDController groundPitchPID(0.1, 0.0, 0, 2, dt);
 
 bool lastSwitchState = false; // Per modificare i guadagni online
 
@@ -47,7 +47,7 @@ CommandInput in;
 Infrared ir(100);  // Lettura lenta dei dati IR
 
 /* === Stato === */
-bool vola = true, lastInAtterra = false, atterra;
+bool vola = false, lastInAtterra = false, atterra;
 uint16_t distance = 65535;
 
 /* === Prototipi loop principale === */
@@ -85,16 +85,20 @@ void loop() {
     imu.update(pitch, roll);
 
     // Leggi input dal radiocomando
-    readCommands(in);
+    // readCommands(in);
 
     // Prepara l'atterraggio quando viene commutato lo switch
-    atterra = in.atterra && !lastInAtterra;
-    lastInAtterra = in.atterra;
+    // atterra = in.atterra && !lastInAtterra;
+    // lastInAtterra = in.atterra;
 
-    if (atterra /*&& distance < 100*/) {  // Estende le gambe fino al contatto con lo switch
+    if (distance < 160) {  // Estende le gambe fino al contatto con lo switch
       extendUntilContact(vola, atterra);
     } 
-    if(vola || atterra){  // Se sta volando o atterrando
+    else{
+      retractAllMotors();
+    }
+
+    if(vola){  // Se sta volando o atterrando
       flightControlLoop();
     }
     else {  // Se è a terra
@@ -103,11 +107,7 @@ void loop() {
 
     // Debug (seriale)
     // printReceiverInput(in);
-<<<<<<< HEAD
-    printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
-=======
     // printAttitudeInfo(roll, pitch, rollSetpoint, pitchSetpoint, rollPID, pitchPID, yawPID, distance / 10.0);
->>>>>>> 9c56b08461edd2655d54698373f3c31d5c89545e
   }
 }
 
@@ -140,7 +140,7 @@ void groundControlLoop() {
   // Controlla i motori
   controlMotors(rollPID, pitchPID); 
 
-  if(groundRollPID.prevError == 0 && groundPitchPID.prevError == 0){
+  if(abs(groundRollPID.prevError) < 2 && abs(groundPitchPID.prevError) < 2) {
     vola = true;
   }    
 }

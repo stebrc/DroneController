@@ -3,6 +3,10 @@
 
 #include <Arduino.h>
 
+#define MOTOR_A_ENABLE 7
+#define MOTOR_B_ENABLE 8
+#define MOTOR_C_ENABLE 9
+#define MOTOR_D_ENABLE 10
 #define MOTOR_A_EXTEND 40  
 #define MOTOR_A_RETRACT 38 
 #define MOTOR_B_EXTEND 52  

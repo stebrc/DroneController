@@ -1,6 +1,16 @@
 #include "LinMotor.h"
 
 void initLinMotor(){
+    pinMode(MOTOR_A_ENABLE, OUTPUT);
+    pinMode(MOTOR_B_ENABLE, OUTPUT);
+    pinMode(MOTOR_C_ENABLE, OUTPUT);
+    pinMode(MOTOR_D_ENABLE, OUTPUT);
+
+    digitalWrite(MOTOR_A_ENABLE, HIGH);
+    digitalWrite(MOTOR_B_ENABLE, HIGH);
+    digitalWrite(MOTOR_C_ENABLE, HIGH);
+    digitalWrite(MOTOR_D_ENABLE, HIGH);
+
     pinMode(MOTOR_A_EXTEND, OUTPUT);
     pinMode(MOTOR_A_RETRACT, OUTPUT);
     pinMode(MOTOR_B_EXTEND, OUTPUT);
@@ -87,10 +97,10 @@ void extendUntilContact(bool &vola, bool &atterra) {
     bool swC = digitalRead(SWITCH_C);
     bool swD = digitalRead(SWITCH_D);
 
-    Serial.print("A:"); Serial.print(swA);
-    Serial.print(" B:"); Serial.print(swB);
-    Serial.print(" C:"); Serial.print(swC);
-    Serial.print(" D:"); Serial.println(swD);
+    // Serial.print("A:"); Serial.print(swA);
+    // Serial.print(" B:"); Serial.print(swB);
+    // Serial.print(" C:"); Serial.print(swC);
+    // Serial.print(" D:"); Serial.println(swD);
 
     setMotor('A', swA ? 0 : 1);
     setMotor('B', swB ? 0 : 1);
