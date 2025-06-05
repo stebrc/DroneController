@@ -113,6 +113,8 @@ void setup() {
   } else {
     // Se il flag non è presente, esegui la calibrazione e salvala
     Serial.println("Calibrando IMU (prima volta o dopo reset 'pulito')..."); 
+    retractAllMotors();
+    delay(3000);
     imu.calibrate();
     
     // Salva i bias calibrati nella struttura

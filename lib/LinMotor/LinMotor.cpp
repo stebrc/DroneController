@@ -21,8 +21,6 @@ void initLinMotor(){
     pinMode(SWITCH_D, INPUT_PULLUP);
 
     enableAllMotors();
-    retractAllMotors();
-    delay(3000);
 }
 
 void enableAllMotors() {
