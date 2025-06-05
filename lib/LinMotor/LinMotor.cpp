@@ -6,11 +6,6 @@ void initLinMotor(){
     pinMode(MOTOR_C_ENABLE, OUTPUT);
     pinMode(MOTOR_D_ENABLE, OUTPUT);
 
-    digitalWrite(MOTOR_A_ENABLE, HIGH);
-    digitalWrite(MOTOR_B_ENABLE, HIGH);
-    digitalWrite(MOTOR_C_ENABLE, HIGH);
-    digitalWrite(MOTOR_D_ENABLE, HIGH);
-
     pinMode(MOTOR_A_EXTEND, OUTPUT);
     pinMode(MOTOR_A_RETRACT, OUTPUT);
     pinMode(MOTOR_B_EXTEND, OUTPUT);
@@ -25,8 +20,36 @@ void initLinMotor(){
     pinMode(SWITCH_C, INPUT_PULLUP);
     pinMode(SWITCH_D, INPUT_PULLUP);
 
+    enableAllMotors();
     retractAllMotors();
-    delay(2000);
+    delay(3000);
+}
+
+void enableAllMotors() {
+    digitalWrite(MOTOR_A_ENABLE, HIGH);
+    digitalWrite(MOTOR_B_ENABLE, HIGH);
+    digitalWrite(MOTOR_C_ENABLE, HIGH);
+    digitalWrite(MOTOR_D_ENABLE, HIGH);
+}
+
+void disableAllMotors() {
+    digitalWrite(MOTOR_A_ENABLE, LOW);
+    digitalWrite(MOTOR_B_ENABLE, LOW);
+    digitalWrite(MOTOR_C_ENABLE, LOW);
+    digitalWrite(MOTOR_D_ENABLE, LOW);
+
+    setMotor('A', 0);
+    setMotor('B', 0);
+    setMotor('C', 0);
+    setMotor('D', 0);
+}
+
+void retractAllMotors() {
+
+    setMotor('A', -1);
+    setMotor('B', -1);
+    setMotor('C', -1);
+    setMotor('D', -1);
 }
 
 void setMotor(char motor, int command) {
@@ -111,11 +134,4 @@ void extendUntilContact(bool &vola, bool &atterra) {
         vola = false;
         atterra = false;
     }
-}
-
-void retractAllMotors() {
-    setMotor('A', -1);
-    setMotor('B', -1);
-    setMotor('C', -1);
-    setMotor('D', -1);
 }

@@ -22,12 +22,16 @@
 
 void initLinMotor();
 
+void enableAllMotors();
+
+void disableAllMotors();
+
+void retractAllMotors();
+
 void setMotor(char motor, int command);
 
 void controlMotors(float rollPID, float pitchPID);
 
 void extendUntilContact(bool &vola, bool &atterra);
-
-void retractAllMotors();
 
 #endif // LINMOTOR_H
