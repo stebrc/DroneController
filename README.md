@@ -31,8 +31,14 @@ Il firmware è suddiviso in librerie C++ dedicate, orchestrate dal file `main.cp
 ### Sfida 1: Stima Stabile dell'Assetto
 Il rumore dei motori corrompeva le letture dell'accelerometro, mentre il giroscopio soffriva di deriva. Il problema è stato risolto fondendo i dati dei due sensori con un **filtro di Kalman**, la cui logica è implementata nella libreria `Orientation`. Il filtro usa il giroscopio per predire lo stato (angolo) e l'accelerometro per correggerlo.
 
-* **Predizione**: $\hat{\phi}_k^- = \hat{\phi}_{k-1} + \Delta t \cdot \dot{\phi}_{gyro, k}$
-* **Correzione**: $\hat{\phi}_k = \hat{\phi}_k^- + K_k (\phi_{acc, k} - \hat{\phi}_k^-)$
+* **Predizione**:
+    $$
+    \hat{\phi}_k^- = \hat{\phi}_{k-1} + \Delta t \cdot \dot{\phi}_{gyro, k}
+    $$
+* **Correzione**:
+    $$
+    \hat{\phi}_k = \hat{\phi}_k^- + K_k (\phi_{acc, k} - \hat{\phi}_k^-)
+    $$
 
 ### Sfida 2: Stabilità dell'Alimentazione
 I picchi di corrente assorbiti dai motori causavano reset hardware incontrollati. È stato implementato un **Watchdog Timer (WDT)**: se il loop principale si blocca per più di 30 ms, il WDT forza un riavvio controllato del microcontrollore, aumentando la sicurezza.
