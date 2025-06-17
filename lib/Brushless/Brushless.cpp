@@ -10,7 +10,7 @@ void initBrushlessPWM() {
     TCCR3A = 0; TCCR3B = 0;
     TCCR3A |= (1 << COM3A1) | (1 << COM3B1) | (1 << COM3C1) | (1 << WGM31);
     TCCR3B |= (1 << WGM33) | (1 << CS31); // Prescaler 8, Phase-Correct PWM
-    ICR3 = 40000; // 100Hz: 16MHz / (8 * 40000) ≈ 50Hz (Phase-Correct)
+    ICR3 = 20000; // 100Hz: 16MHz / (2 * 8 * 20000) ≈ 50Hz (Phase-Correct)
 
     OCR3B = ESC_STOP;
     OCR3C = ESC_STOP;
@@ -20,7 +20,7 @@ void initBrushlessPWM() {
     TCCR4A = 0; TCCR4B = 0;
     TCCR4A |= (1 << COM4A1) | (1 << WGM41);
     TCCR4B |= (1 << WGM43) | (1 << CS41); // Prescaler 8, Phase-Correct PWM
-    ICR4 = 40000; // Stessa frequenza
+    ICR4 = 20000; // Stessa frequenza
 
     OCR4A = ESC_STOP;
 }
